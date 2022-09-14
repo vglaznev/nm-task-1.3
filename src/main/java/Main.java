@@ -1,7 +1,7 @@
 import function.Function;
 import function.FunctionUtil;
 import function.SimpleFunction;
-import reader.InterpolationConfigurationFileReader;
+import reader.PropertiesFileReader;
 import reader.Reader;
 import spline.CubicSpline;
 import spline.SplineBuilder;
@@ -10,13 +10,15 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.Properties;
 
-import static java.lang.Math.*;
+import static java.lang.Math.abs;
+import static java.lang.Math.sin;
 
 public class Main {
     private static final int PLOTTER_RESOLUTION = 1000;
+    private static final String SPLINE_CONFIG_FILE_NAME = "spline.properties";
 
     public static void main(String[] args) throws IOException {
-        Reader reader = new InterpolationConfigurationFileReader("spline.properties");
+        Reader reader = new PropertiesFileReader(SPLINE_CONFIG_FILE_NAME);
         Properties properties = reader.read();
 
         SimpleFunction function = new SimpleFunction(x -> sin(x));
@@ -45,7 +47,7 @@ public class Main {
                 "График погрешности",
                 Color.GREEN
                 );
-        plotter.addDots(spline.getInterpolationGrid(), "Узлы интерполяции");
+        plotter.addDots(spline.getInterpolationGrid(), "Узлы интерполяции", Color.BLUE);
 
         plotter.display();
     }
