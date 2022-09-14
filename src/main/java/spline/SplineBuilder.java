@@ -30,11 +30,6 @@ public class SplineBuilder {
         return this;
     }
 
-    public SplineBuilder degree(int degree) {
-        this.numberOfSubIntervals = degree;
-        return this;
-    }
-
     public SplineBuilder A(double A) {
         this.A = A;
         return this;
@@ -70,7 +65,7 @@ public class SplineBuilder {
             throw new NullPointerException("Please set all parameters.");
         }
         double[] nodes = splitter.split(beginOfInterval, endOfInterval, numberOfSubIntervals + 1);
-        double[] fval = Arrays.stream(nodes).map(function::getY).toArray();
+        double[] functionValues = Arrays.stream(nodes).map(function::getY).toArray();
 
         int n = numberOfSubIntervals;
 
@@ -82,7 +77,7 @@ public class SplineBuilder {
         double[] lowerDiagonal = new double[n];
         double[] diagonal = new double[n + 1];
         double[] upperDiagonal = new double[n];
-        double[] f = new double[n + 1];
+        double[] constantTerm = new double[n + 1];
 
         lowerDiagonal[lowerDiagonal.length - 1] = 0;
         for (int i = 0; i < lowerDiagonal.length - 1; i++) {
@@ -100,26 +95,26 @@ public class SplineBuilder {
             upperDiagonal[i] = 2 / h[i];
         }
 
-        f[0] = A;
-        f[f.length - 1] = B;
-        for (int i = 1; i < f.length - 1; i++) {
-            f[i] = 3 * ((fval[i] - fval[i - 1]) / pow(h[i - 1], 2) + 2 * (fval[i + 1] - fval[i]) / pow(h[i], 2));
+        constantTerm[0] = A;
+        constantTerm[constantTerm.length - 1] = B;
+        for (int i = 1; i < constantTerm.length - 1; i++) {
+            constantTerm[i] = 3 * ((functionValues[i] - functionValues[i - 1]) / pow(h[i - 1], 2) + 2 * (functionValues[i + 1] - functionValues[i]) / pow(h[i], 2));
         }
 
         TridiagonalMatrixAlgorithm solver = new TridiagonalMatrixAlgorithm();
 
-        double[] bCoef = solver.solve(lowerDiagonal, diagonal, upperDiagonal, f);
+        double[] b = solver.solve(lowerDiagonal, diagonal, upperDiagonal, constantTerm);
 
-        double[] cCoef = new double[n];
-        double[] dCoef = new double[n];
-        double[] aCoef = new double[n];
+        double[] a = new double[n];
+        double[] c = new double[n];
+        double[] d = new double[n];
 
         for (int i = 1; i < n + 1; i++) {
-            aCoef[i - 1] = fval[i];
-            dCoef[i - 1] = (bCoef[i] + bCoef[i - 1]) / pow(h[i - 1], 2) - 2 * (fval[i] - fval[i - 1]) / pow(h[i - 1], 3);
-            cCoef[i - 1] = (bCoef[i] - bCoef[i - 1]) / (2 * h[i - 1]) + 3 * h[i - 1] * dCoef[i - 1] / 2;
+            a[i - 1] = functionValues[i];
+            d[i - 1] = (b[i] + b[i - 1]) / pow(h[i - 1], 2) - 2 * (functionValues[i] - functionValues[i - 1]) / pow(h[i - 1], 3);
+            c[i - 1] = (b[i] - b[i - 1]) / (2 * h[i - 1]) + 3 * h[i - 1] * d[i - 1] / 2;
         }
-        bCoef = Arrays.copyOfRange(bCoef, 1, bCoef.length);
-        return new CubicSpline(aCoef, bCoef, cCoef, dCoef, nodes);
+        b = Arrays.copyOfRange(b, 1, b.length);
+        return new CubicSpline(a, b, c, d, nodes, functionValues);
     }
 }

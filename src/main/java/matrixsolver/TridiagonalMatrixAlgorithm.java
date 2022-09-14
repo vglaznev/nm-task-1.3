@@ -1,22 +1,22 @@
 package matrixsolver;
 
 public class TridiagonalMatrixAlgorithm {
-    public double[] solve(double[] a, double[] b, double[] c, double[] f) {
-        int n = f.length;
-        double[] alpha = new double[f.length];
-        double[] beta = new double[f.length];
-        double[] solution = new double[f.length];
+    public double[] solve(double[] lowerDiagonal, double[] diagonal, double[] upperDiagonal, double[] constTerm) {
+        int n = constTerm.length;
+        double[] alpha = new double[constTerm.length];
+        double[] beta = new double[constTerm.length];
+        double[] solution = new double[constTerm.length];
         double denominator;
 
-        alpha[0] = -c[0] / b[0];
-        beta[0] = f[0] / b[0];
+        alpha[0] = -upperDiagonal[0] / diagonal[0];
+        beta[0] = constTerm[0] / diagonal[0];
 
 
         for (int i = 1; i < n; i++) {
-            denominator = b[i] + a[i - 1] * alpha[i - 1];
+            denominator = diagonal[i] + lowerDiagonal[i - 1] * alpha[i - 1];
             if (i < n - 1)
-                alpha[i] = -c[i] / denominator;
-            beta[i] = (f[i] - a[i - 1] * beta[i - 1]) / denominator;
+                alpha[i] = -upperDiagonal[i] / denominator;
+            beta[i] = (constTerm[i] - lowerDiagonal[i - 1] * beta[i - 1]) / denominator;
         }
 
         solution[n - 1] = beta[n - 1];
