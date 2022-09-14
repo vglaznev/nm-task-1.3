@@ -2,8 +2,6 @@ package spline;
 
 import function.Function;
 
-import java.util.Arrays;
-
 import static java.lang.Math.pow;
 
 public class CubicSpline implements Function {
@@ -26,10 +24,9 @@ public class CubicSpline implements Function {
     @Override
     public double getY(double x) {
         int i;
-        for (i = 0; i < nodes.length - 2 && nodes[i] < x; i++) {
+        for (i = 0; i < nodes.length - 2 && nodes[i + 1] < x; i++) {
         }
-
         System.out.println("i= " + i + " x= " + x);
-        return a[i] + b[i + 1] * (x - nodes[i]) + c[i] * pow(x - nodes[i], 2) + d[i] * pow(x - nodes[i], 3);
+        return a[i] + b[i] * (x - nodes[i + 1]) + c[i] * pow(x - nodes[i + 1], 2) + d[i] * pow(x - nodes[i + 1], 3);
     }
 }
